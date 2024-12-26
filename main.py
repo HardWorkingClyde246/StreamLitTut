@@ -11,13 +11,14 @@ model_name = 'facebook/bart-large-cnn'
 model = BartForConditionalGeneration.from_pretrained(model_name)
 tokenizer = BartTokenizer.from_pretrained(model_name)
 
-# Functions for summarisation and keyword extraction
+# summarisation
 def summarise_text(text, max_length=130, min_length=30, do_sample=False):
     inputs = tokenizer.encode("summarize: " + text, return_tensors="pt", max_length=1024, truncation=True)
     summary_ids = model.generate(inputs, max_length=max_length, min_length=min_length, length_penalty=2.0, num_beams=4, early_stopping=True, do_sample=do_sample)
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return summary
 
+# keyword extraction
 def extract_keywords_tfidf(text, top_n=10):
     vectorizer = TfidfVectorizer(stop_words='english')
     tfidf_matrix = vectorizer.fit_transform([text])
@@ -26,6 +27,7 @@ def extract_keywords_tfidf(text, top_n=10):
     top_indices = scores.argsort()[-top_n:][::-1]
     keywords = [(feature_names[i], scores[i]) for i in top_indices]
     return keywords
+
 
 # Streamlit UI
 st.title("AI Interview Analysis Tool")
@@ -37,15 +39,15 @@ candidate_name = st.sidebar.text_input("Candidate Name")
 candidate_email = st.sidebar.text_input("Candidate Email")
 position = st.sidebar.text_input("Position")
 
+
 # Upload video file
 uploaded_file = st.file_uploader("Upload Interview Video", type=["mp4"])
 if uploaded_file:
-    # Save video file temporarily
+    # Save video file
     with open("uploaded_video.mp4", "wb") as f:
         f.write(uploaded_file.read())
 
     # Extract audio and transcribe
-    st.info("Processing video...")
     try:
         video = mp.VideoFileClip("uploaded_video.mp4")
         audio_file = video.audio
