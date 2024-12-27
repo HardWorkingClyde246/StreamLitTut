@@ -6,6 +6,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pandas as pd
 
+!pip install transformers torch indobenchmark
+
 # Load the BART model and tokenizer
 model_name = 'facebook/bart-large-cnn'
 model = BartForConditionalGeneration.from_pretrained(model_name)
